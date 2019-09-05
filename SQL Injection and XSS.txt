@@ -1,0 +1,30 @@
+Both SQL injection issue and XSS attack prevention code inside the filter
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+        throws IOException, ServletException {
+    	
+    	HttpServletRequest req = (HttpServletRequest) request;
+    	HttpServletResponse res = (HttpServletResponse) response;
+		Enumeration<String> parameterNames = req.getParameterNames();
+		while (parameterNames.hasMoreElements()) {
+			String paramName = parameterNames.nextElement();
+			System.out.println("******paramName :" + paramName);
+			String[] paramValues = req.getParameterValues(paramName);
+			for (int i = 0; i < paramValues.length; i++) {
+				String paramValue = paramValues[i];
+				if (null != paramValue) {
+					System.out.println("******paramValue :" + paramValue);
+					String value = paramValue.toUpperCase();
+					if (value.contains("<SCRIPT>")) {
+						System.out.println("*****Cross site scripting*****");
+						res.sendRedirect("BMS_login.jsp");
+					}
+					if (value.contains("SELECT") && value.contains("FROM")) {
+						System.out.println("*** SQL INjection issue******");
+						res.sendRedirect("BMS_login.jsp");
+					}
+				}
+			}
+		}
